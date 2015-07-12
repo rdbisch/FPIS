@@ -48,6 +48,34 @@ object MyModule {
     msg.format(as.mkString(","), isSorted(as, comp))
   }
 
+  /** Exercise 2.3 */
+  def curry[A,B,C](f: (A, B) => C): A => (B => C) = {
+    (a: A) => (b: B) => f(a, b)
+  }
+
+  /** Exercise 2.4 */
+  def uncurry[A,B,C](f: A => B => C): (A, B) => C = {
+    (a: A, b: B) => f(a)(b)
+  }
+
+  def testCurry() = {
+    val test = curry( (x:Int, y:Int) => x + y )
+    val test2 = test(4)
+    println(test2(5))
+    val test3 = uncurry(test)
+    println(test3(4,5))
+  }
+
+  /** Exercise 2.5 */
+  def compose[A,B,C](f: B=>C, g: A=>B): A=>C = {
+    (a: A) => f(g(a))
+  }
+
+  def testCompose() {
+    val doubleFactorial = compose( factorial, factorial )
+    println(doubleFactorial(3))
+  }
+
   def main(args: Array[String]): Unit =
     println(formatResult("absolute value", -42, abs))
     println(formatResult("factorial", 7, factorial))
@@ -59,4 +87,6 @@ object MyModule {
     println(testIsSorted(Array(1,2)))
     println(testIsSorted(Array(2,1)))
     println(testIsSorted(Array(1,2,5,4,5,9,1,23,2,24,3,4,5,1,2,3,4,5)))
+    testCurry()
+    testCompose()
 }
