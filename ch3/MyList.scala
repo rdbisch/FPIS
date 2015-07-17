@@ -29,4 +29,36 @@ object MyList {
       case Cons(x, xs) => drop(xs, n - 1)
     }
   }
+
+  /* Exercise 3.5 */
+  def dropWhile[A](el: MyList[A])(filter: A => Boolean): MyList[A] = el match {
+    case Cons(x, xs) if filter(x) => dropWhile(xs)(filter)
+    case _ => el
+  }
+
+  /* Exercise 3.6 */
+  def init[A](el: MyList[A]) : MyList[A] = el match {
+    case Nil => Nil
+    case Cons(x, Nil) => Nil
+    case Cons(x, xs) => Cons(x, init(xs))
+  }
+
+  def foldRight[A, B](as: MyList[A], z: B)(f: (A, B) => B): B = 
+    as match {
+      case Nil => z
+      case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+    }
+
+  /* Exercise 3.9 */
+  def length[A](as: MyList[A]): Int = foldRight(as, 0)((x, y) => 1 + y)
+
+  /* Exercise 3.10 */
+  @annotation.tailrec
+  def foldLeft[A, B](as: MyList[A], z: B)(f: (B, A) => B): B = {
+    as match {
+      case Nil => z
+      case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
+    }
+  }
+
 }
