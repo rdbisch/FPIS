@@ -85,4 +85,28 @@ object MyList {
   def appendLists[A](as: MyList[MyList[A]]) : MyList[A] = {
     foldLeft(as, Nil:MyList[A])(appendList)
   }
+
+  /* Exercise 3.16 . oops also 3.18 */
+  def map[A, B](as: MyList[A])( f: A => B ) : MyList[B] = {
+    foldRight(as, Nil:MyList[B])( (y, x) => Cons(f(y), x) )
+  }
+  /* Exercise 3.16 */
+  def addOne(as: MyList[Int]) = map(as)(_ + 1)
+  /* Exercise 3.17 */
+  def dblToString(as: MyList[Double]) = map(as)(_.toString)
+
+  /* Exercise 3.19 */
+  def filter[A](as: MyList[A])(f: A => Boolean): MyList[A] = {
+    foldRight2(as, Nil: MyList[A])( (x, y) => f(x) match {
+        case true => Cons(x, y)
+        case false => y
+      })
+  }
+
+  /* Exercise 3.20 */
+  def flatMap[A, B](as: MyList[A])( f: A => MyList[B] ): MyList[B] = {
+    appendLists(
+      foldLeft(as, Nil:MyList[MyList[B]])( (x, y) => Cons(f(y), x) )
+    )
+  }
 }
