@@ -142,22 +142,22 @@ object MyList {
   }
 
   /* Exercise 3.24 */
-  /*  (1,2,3,4) : (1,3)
-        1::(2,3,4) :  1:(3)
-        (2,3,4)    :  (3)
-  */
-  def hasSubsequence[A]( sup: MyList[A], sub: MyList[A] ) : Boolean = {
+  def hasSubsequence[A]( sup: MyList[A], sub: MyList[A], first: Boolean ) : Boolean = {
     sup match {
       case Cons(x, xs) => {
         sub match {
           case Cons(y, ys) => {
-            if (x == y) hasSubsequence( xs, ys ) || hasSubsequence( xs, sub )
-            else false
+            if (x == y) hasSubsequence( xs, ys, false ) || (first && hasSubsequence( xs, sub, first ))
+            else first && hasSubsequence( xs, sub, first )
           }
           case Nil => true
         }
       }
-      case Nil => false
+      case Nil => 
+          sub match {
+              case Nil => true
+              case _ => false
+          }
     }
   }
 }
