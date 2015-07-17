@@ -140,4 +140,24 @@ object MyList {
       case Nil => Nil
     }
   }
+
+  /* Exercise 3.24 */
+  /*  (1,2,3,4) : (1,3)
+        1::(2,3,4) :  1:(3)
+        (2,3,4)    :  (3)
+  */
+  def hasSubsequence[A]( sup: MyList[A], sub: MyList[A] ) : Boolean = {
+    sup match {
+      case Cons(x, xs) => {
+        sub match {
+          case Cons(y, ys) => {
+            if (x == y) hasSubsequence( xs, ys ) || hasSubsequence( xs, sub )
+            else false
+          }
+          case Nil => true
+        }
+      }
+      case Nil => false
+    }
+  }
 }
