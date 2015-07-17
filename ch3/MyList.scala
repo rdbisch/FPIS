@@ -61,4 +61,28 @@ object MyList {
     }
   }
 
+  /* Exercise 3.12 */
+  def revList[A](as: MyList[A]) : MyList[A] = {
+    foldLeft(as, Nil:MyList[A])((x, y) => Cons(y, x))
+  }
+
+  /* Exercise 3.13 */
+  def foldRight2[A, B](as: MyList[A], z: B)(f: (A, B) => B): B = {
+    foldLeft(revList(as), z)( (b:B, a:A) => f(a, b) )
+  }
+
+  /* Exercise 3.14 */
+  def append[A](as: MyList[A], item: A) : MyList[A] = {
+    foldRight2(as, Cons(item, Nil))((x, y) => Cons(x, y))
+  }
+
+  /* Exercise 3.14 */
+  def appendList[A](as: MyList[A], bs: MyList[A]) : MyList[A] = {
+    foldLeft(as, bs)(append)
+  }
+
+  /* Exercise 3.15 */
+  def appendLists[A](as: MyList[MyList[A]]) : MyList[A] = {
+    foldLeft(as, Nil:MyList[A])(appendList)
+  }
 }
