@@ -109,4 +109,35 @@ object MyList {
       foldLeft(as, Nil:MyList[MyList[B]])( (x, y) => Cons(f(y), x) )
     )
   }
+
+  /* Exercise 3.21 */
+  def filter2[A](as: MyList[A])(f: A => Boolean) : MyList[A] = {
+    flatMap(as)( (a: A) => if (f(a)) MyList(a) else Nil )
+  }
+
+  /* Exercise 3.22 */
+  def addLists( as: MyList[Int], bs: MyList[Int] ) : MyList[Int] = {
+    as match {
+      case Cons(x, xs) => {
+        bs match {
+          case Cons(y, ys) => Cons(x + y, addLists(xs, ys))
+          case Nil => Nil
+        }
+      }
+      case Nil => Nil
+    }
+  }
+
+  /* Exercise 3.23 */
+  def zipWith[A, B, C]( as: MyList[A], bs: MyList[B] )( f: (A, B) => C ) : MyList[C] = {
+    as match {
+      case Cons(x, xs) => {
+        bs match {
+          case Cons(y, ys) => Cons( f(x, y), zipWith(xs, ys)(f))
+          case Nil => Nil
+        }
+      }
+      case Nil => Nil
+    }
+  }
 }
