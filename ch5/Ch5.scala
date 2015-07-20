@@ -4,6 +4,27 @@ sealed trait MyStream[+A] {
         case Cons(h, t) => h() :: t().toList
         case Empty => Nil
     }
+
+    def take(n : Int): MyStream[A] = this match {
+        case Cons(h, t) if n > 0 => Cons(h, () => t().take(n-1))
+        case _ => Empty
+    }
+
+    def drop(n: Int): MyStream[A] = this match {
+        case Cons(h, t) if n > 0 => t().drop(n - 1)
+        case _ => this
+    }
+
+    def takeWhile(p: A => Boolean): MyStream[A] = {
+        this match {
+            case Cons(h, t) => {
+                val he = h()
+                if (p(he)) Cons( () => he, t )
+                else Empty
+            }
+            case _ => Empty
+        }
+    }
 }
 case object Empty extends MyStream[Nothing]
 case class Cons[+A](h: () => A, t: () => MyStream[A]) extends MyStream[A]
