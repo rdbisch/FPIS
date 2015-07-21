@@ -1,5 +1,5 @@
-
-sealed trait MyStream[+A] {
+import MyStream._
+trait MyStream[+A] {
 
     def headOption: Option[A] = this match {
         case Empty => None
@@ -12,7 +12,7 @@ sealed trait MyStream[+A] {
     }
 
     def take(n : Int): MyStream[A] = this match {
-        case Cons(h, t) if n > 0 => Cons(h, () => t().take(n-1))
+        case Cons(h, t) if n > 0 => cons(h(), t().take(n-1))
         case _ => Empty
     }
 
@@ -23,7 +23,7 @@ sealed trait MyStream[+A] {
 
     def takeWhile(p: A => Boolean): MyStream[A] = {
         this match {
-            case Cons(h, t) if p(h()) => Cons(h, () => t().takeWhile(p))
+            case Cons(h, t) if p(h()) => cons(h(), t() takeWhile p)
             case _ => Empty
         }
     }
@@ -40,7 +40,7 @@ sealed trait MyStream[+A] {
         foldRight(true)((a, b) => p(a) && b)
 
     def takeWhile2(p: A => Boolean): MyStream[A] = {
-        foldRight(Empty : MyStream[A])((a, b) => if (p(a)) Cons(() => a, () => b) else Empty)
+        foldRight(Empty : MyStream[A])((a, b) => if (p(a)) cons(a, b) else empty)
     }
 
     def headOption2 : Option[A] = {
@@ -48,19 +48,30 @@ sealed trait MyStream[+A] {
     }
 
     def map[B]( f: A => B) : MyStream[B] = this match {
-        case Cons(h, t) => Cons(() => f(h()), () => t().map(f))
-        case Empty => Empty
+        case Cons(h, t) => cons(f(h()), t().map(f)) 
+        case Empty => empty
     }
 
     def map2[B]( f: A => B ) : MyStream[B] =
-        foldRight(Empty:MyStream[B])((a, b) => Cons( () => f(a), () => b ))
+        foldRight(empty[B])((a, b) => cons(f(a), b))
 
     def filter( f: A => Boolean ) : MyStream[A] = 
-        foldRight(Empty:MyStream[A])((a, b) => if (f(a)) Cons(() => a, () => b.filter(f)) else b.filter(f))
+        foldRight(empty[A])((a, b) => if (f(a)) cons(a, b) else b)
+
+    def append[B>:A]( s: MyStream[B] ) : MyStream[B] = 
+        foldRight(this)((a, b) => cons(a, b))
 
     def flatMap[B]( f: A => MyStream[B] ) : MyStream[B] = 
-        foldRight(Empty:MyStream[B])((a, b) => MyStream.appendStream(f(a), b))
+        foldRight(empty[B])((a, b) => f(a) append b)
 
+    def unfold[B, S](z: S)(f: S => Option[(B, S)]) : MyStream[B] = this match {
+        case Cons(h, t) => 
+            f(z) match =>
+                Some((b: B, s: S)) => cons(z, unfold(s)(f))
+                None => empty
+    
+        case Empty => empty
+    }
 }
 case object Empty extends MyStream[Nothing]
 case class Cons[+A](h: () => A, t: () => MyStream[A]) extends MyStream[A]
@@ -76,10 +87,18 @@ object MyStream {
     def apply[A](as: A*): MyStream[A] = 
         if (as.isEmpty) empty else cons(as.head, apply(as.tail: _*))
 
-    def append[A]( stream : MyStream[A], item : A ) : MyStream[A] = 
-        stream.foldRight( MyStream(item) )( (a, b) => Cons( () => a, () => b ))
 
-    def appendStream[A]( stream: MyStream[A], other: MyStream[A]) : MyStream[A] = 
-        other.foldRight( stream )( (a, b) => MyStream.append(b, a) )
+    def constant[A](a: A): MyStream[A] = {
+        cons(a, constant(a))
+    }
+
+    def from(n: Int): MyStream[Int] = {
+        cons(n, from(n + 1))
+    }
+
+    def fib() : MyStream[Int] = fib(1,1)
+    def fib(a: Int, b: Int) : MyStream[Int] = cons(b, fib(b, a + b))
+
+
 }
 
