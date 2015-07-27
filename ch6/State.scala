@@ -29,5 +29,32 @@ object State {
 
 }
 
-type Rand[A] = State[RNG, A]
+def modify[S](f: S => S): State[S, Unit] = for {
+    s <- get
+    _ <- set(f(s))
+} yield ()
+
+def get[S]: State[S, S] = State(s => (s, s))
+def set[S](s: S): State[S, Unit] = State(_ => ((), s))
+
+sealed trait Input
+case object Coin extends Input
+case object Turn extends Input
+
+case class Machine(locked: Boolean, candies: Int, coins: Int) {
+    def update(input:Input) : Machine = { 
+        input match {
+            case _ if candies == 0 => this
+            case Coin => Machine(false, candies, coins + 1)
+            case Turn if locked => this
+            case Turn => Machine(true, candies - 1, coins)
+        }
+    }
+
+    def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = inputs match {
+        case el :: els => update(el).simulateMachine(els)
+        case Nil => State(_ => ((candies, coins), this))
+    }
+}
+
 
